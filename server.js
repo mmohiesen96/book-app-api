@@ -5,8 +5,8 @@ const cors = require('cors');
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-
 const app = express();
+app.use(express.json());
 app.use(cors());
 
 const PORT = process.env.PORT;
@@ -51,7 +51,7 @@ function bookCollectionSeed() {
     siege.save();
 }
 
-bookCollectionSeed();
+// bookCollectionSeed();
 
 function userCollectionSeed() {
     const mohammed = new userModel({
@@ -92,9 +92,49 @@ function userCollectionSeed() {
     mohammed.save();
 }
 
-userCollectionSeed();
+// userCollectionSeed();
 app.get('/', homePage);
 app.get('/books', bookHandler);
+app.post('/addBook' , addBookHandler);
+app.delete('/deleteBook/:index' , deleteBookHandler);
+
+function addBookHandler(req,res) {
+    const {name,description,image_url,email} = req.body;
+    
+    userModel.find({email:email} , (error,bookData) => {
+        if(error) {
+            res.send('User not found');
+        }
+
+        else {
+            bookData[0].books.push({
+                name: name,
+                description:description,
+                image_url:image_url
+            });
+            bookData[0].save();
+            res.send(bookData[0].books);
+        }
+    })
+
+}
+
+function deleteBookHandler(req, res) {
+    const {email} = req.query;
+    const index = Number(req.params.index)
+    userModel.find({email:email}, (error, bookData)=>{
+        const newBookArr = bookData[0].books.filter((book,idx)=>{
+            if (idx !== index) {
+                return book;
+            }
+        })
+        bookData[0].books = newBookArr;
+        bookData[0].save();
+        res.send(bookData[0].books);
+    })
+
+    console.log(req.query);
+}
 
 function bookHandler(req,res) {
     let userEmail = req.query.email;
@@ -102,9 +142,7 @@ function bookHandler(req,res) {
         if(err) {
             console.log('did not work')
         } else {
-            console.log(userData)
-            console.log(userData[0])
-            console.log(userData[0].books)
+        
             res.send(userData[0].books)
         }
     })
