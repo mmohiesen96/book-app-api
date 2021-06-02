@@ -11,7 +11,7 @@ app.use(cors());
 
 const PORT = process.env.PORT;
 
-mongoose.connect('mongodb://localhost:27017/books',
+mongoose.connect(process.env.MONGODB_URI,
     { useNewUrlParser: true, useUnifiedTopology: true });
 
 const bookSchema = new mongoose.Schema({
