@@ -97,6 +97,7 @@ app.get('/', homePage);
 app.get('/books', bookHandler);
 app.post('/addBook' , addBookHandler);
 app.delete('/deleteBook/:index' , deleteBookHandler);
+app.put('/updateBook/:index',updateBookHandler);
 
 function addBookHandler(req,res) {
     const {name,description,image_url,email} = req.body;
@@ -134,6 +135,25 @@ function deleteBookHandler(req, res) {
     })
 
     console.log(req.query);
+}
+
+function updateBookHandler (req , res ) {
+    const {name,description,image_url,email} = req.body;
+    const index = Number(req.params.index);
+
+    userModel.findOne({email:email} , (error,newBookArr) => {
+        newBookArr.books[index] = {
+            name:name ,
+            description:description,
+            image_url:image_url
+        }
+
+        // newBookArr.splice()
+        console.log(newBookArr.books);
+        newBookArr.save();
+        res.send(newBookArr.books)
+    })
+
 }
 
 function bookHandler(req,res) {
